@@ -1,4 +1,6 @@
-import pyfiglet, random
+"""A progrm to get a random equation based on its result and length"""
+import random
+import pyfiglet
 
 functions = ["+", "-", "*", "/", "**", "%"]
 
