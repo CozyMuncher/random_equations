@@ -1,71 +1,236 @@
 """A progrm to get a random equation based on its result and length"""
 import random
+import sys
 import pyfiglet
 
+# Some variables to make life easier for me
 functions = ["+", "-", "*", "/", "**", "%"]
 
+# PEMDAS stuff
+pedmas = ['*', '/', '%']
+
+# Stores the euqation
+equation = ''
+
+# Stores the last symbol
+lastsym = ''
+
+# Contains some stuff for pemdas
+symbols = []
+numbers = []
+
+# Internals
+loop = 0
+maxsize = sys.maxsize
+
+# UI
 print(pyfiglet.figlet_format("Random Equations"))
 
 result = input("What is the result?")
 length = input("How long do you want the equation to be?")
 
-equation = ''
-lastsym = ''
-loop = 0
+
 
 def power():
-    global equation, loop
+    """Function to power a number"""
+    global equation, loop, numbers
+
+    if loop != 0:
+        print("Power Repeat")
+    else:
+        print("Power Start")
 
     if loop == 5:
         equation = equation[:-1]
+        equation = equation[:-1]
+        symbols.pop()
+
         return False
-    equation += str(random.randint(1,9))
-    try: 
+    
+    if eval(equation[:-2]) > 1000000:
+        equation = equation[:-1]
+        equation = equation[:-1]
+        symbols.pop()
+
+        return False
+
+    new_number = random.randint(1,9)
+    equation += str(new_number)
+
+    try:
         eval(equation)
-    except: 
+
+    except OverflowError:
         equation = equation[:-1]
         loop += 1
         power()
+
+    if eval(equation) > 1000000:
+        equation = equation[:-1]
+        loop +=1
+        power()
+
     loop = 0
+    numbers.append(new_number)
+    print(f"Added: {new_number}")
+    print(F"New equation: {equation}")
+    print(f"New value: {eval(equation)}")
+
     return True
 
+def divide():
+    global equation, numbers
+
+    print("Divide Start")
+
+    value = pemdas_check()
+    print(f"Value: {value}")
+
+    try:
+        if value.isdigit() is False:
+            value = eval(value)
+    except AttributeError:
+        pass
+
+    # Checks if value is too large - takes too long
+    try:
+        if (value) > 1000000:
+            equation = equation[:-1]
+            return False
+    except TypeError:
+        if eval(value) > 1000000:
+            equation = equation[:-1]
+            return False
+
+    # Get factors
+    factors = prime_factors(abs(int(value)))
+    print(f"Factors: {factors}")
+
+    # Checks if factor is a prime
+    if len(factors) == 2:
+        equation = equation[:-1]
+        print("Number is prime")
+        return False
+
+    factors_chosen = random.choice(factors)
+    print(f"Factor chosen: {factors_chosen}")
+
+    equation += str(factors_chosen)
+    numbers.append(factors_chosen)
+
+    print(f"New Equation: {equation}")
+    print(f"New value: {eval(equation)}")
+    return True
+
+
+
 def checker(success, i):
-    if success == True:
+    print("End")
+    if success is True:
         return i
     else:
         return i-1
-    
+
+def check_negative(s):
+    try:
+        f = float(s)
+        if f < 0:
+            return True
+        # Otherwise return false
+        return False
+    except ValueError:
+        return False
+
 def prime_factors(n):
-    i = 2
     factors = []
-    while i * i <= n:
-        if n % i:
-            i += 1
-        else:
-            n //= i
+    for i in range(1, n + 1):
+        if n % i == 0:
             factors.append(i)
-    if n > 1:
-        factors.append(n)
+
     return factors
 
+def checK_range(number):
+    if number > maxsize:
+        return False
+    else: return True
 
-for i in range(int(length)):
+def pemdas_check():
+    temp_eqn = ''
+    print(symbols)
+    print(numbers)
+
+    for i in range(2, len(symbols)):
+        if symbols[-i] in pedmas:
+            print(f"Symbol: {symbols[-i]}")
+            print("Symbol in pemdas")
+        else:
+            if i == 2:
+                return numbers[-1]
+            else:
+                for n in range(i-1, 0, -1):
+                    temp_eqn += str(numbers[-n])
+                    temp_eqn += symbols[-n]
+
+                print(f"temp_eqn: {temp_eqn}")
+                temp_eqn = temp_eqn[:-1]
+                if temp_eqn[-1] == '*': 
+                    temp_eqn = temp_eqn[:-1]
+                return temp_eqn
+    if len(symbols) == 1:
+        return numbers[-1]
+    return numbers[-1]
+
+def get_equation():
+    global equation, lastsym, length, symbols, numbers
+
+    for i in range(int(length)):
+        if lastsym == '**':
+            i = checker(power(), i)
+        elif lastsym == "/":
+            i = checker(divide(), i)
+        else:
+            new_number = random.randint(1,999)
+            equation += str(new_number)
+            numbers.append(new_number)
+
+            print(f"Added {new_number}")
+
+        print(f"Current Equation: {equation}")
+        print(f"Current value {eval(equation)}")
+        print(f"Symbols: {symbols}")
+        print(f"Numbers: {numbers}")
+
+        lastsym = functions[random.randint(0,5)]
+        equation += lastsym
+        symbols.append(lastsym)
+
+        print(f"Added {lastsym}")
+ 
+
+# Gets equation
+get_equation()
+
+for i in range(1):
     if lastsym == '**':
         i = checker(power(), i)
+    elif lastsym == "/":
+        i = checker(divide(), i)
     else:
-        equation += str(int(random.randint(1,999)))
-    lastsym = functions[random.randint(0,5)]
-    equation += lastsym
+        new_number = random.randint(1,999)
+        equation += str(new_number)
+        numbers.append(new_number)
 
-equation += str(random.randint(1,999))
-extra = float(int(result)) - eval(equation)
-equation += "+"
-equation += format(extra)
+extra = (int(result)) - eval(equation)
 
-# factors = prime_factors(extra)
+print(extra)
+print(eval(equation))
 
-# for i in factors:
-#     equation += i
+if extra < 0 and str(format(extra, 'f'))[0] != '-':
+    equation += '-'
+else:
+    equation += '+'
+equation += str(extra)
 
 print("The equation is:")
 print(equation)
+print(f"Result: {eval(equation)}")
