@@ -1,13 +1,16 @@
 """A progrm to get a random equation based on its result and length"""
+
 import random
 import sys
 import pyfiglet
+
+sys.set_int_max_str_digits(0)
 
 # Some variables to make life easier for me
 functions = ["+", "-", "*", "/", "**", "%"]
 
 # PEMDAS stuff
-pedmas = ['*', '/', '%']
+pedmas = ['*', '/', '%', '**']
 
 # Stores the euqation
 equation = ''
@@ -121,13 +124,19 @@ def divide():
     factors = prime_factors(abs(int(value)))
     print(f"Factors: {factors}")
 
-    # Checks if factor is a prime
-    if len(factors) == 2:
+    # Checks if factor is empty (negative no.)
+    if len(factors) == 2 or\
+        len(factors) == 1 or \
+        len(factors) == 0:
         equation = equation[:-1]
-        print("Number is prime")
+        print("Number of factors <= 2")
         return False
 
     factors_chosen = random.choice(factors)
+
+    while factors_chosen == 1:
+        factors_chosen = random.choice(factors)
+
     print(f"Factor chosen: {factors_chosen}")
 
     equation += str(factors_chosen)
@@ -171,8 +180,6 @@ def checK_range(number):
 
 def pemdas_check():
     temp_eqn = ''
-    print(symbols)
-    print(numbers)
 
     for i in range(2, len(symbols)):
         if symbols[-i] in pedmas:
@@ -206,7 +213,7 @@ def get_equation():
                 equation = equation[:-1]
                 equation = equation[:-1]
                 symbols.pop()
-                checker(False, 1)
+                checker(False, i)
             else:
                 i = checker(power(), i)
         elif lastsym == "/":
@@ -225,6 +232,8 @@ def get_equation():
             else:
                 if eval(equation[:-len(lastsym[-1])]) > 1000000 or \
                    eval(equation[:-len(lastsym[-1])]) < -1000000:
+
+                    print("too large")
                     if lastsym == "**":
                         equation = equation[:-2]
                     else:
@@ -243,6 +252,7 @@ def get_equation():
                         new_number = random.randint(1,999)
                         equation += str(new_number)
                         numbers.append(new_number)
+                    print("DONE TOO MUCH")
                 else:
                     new_number = random.randint(1,999)
                     equation += str(new_number)
@@ -267,13 +277,13 @@ get_equation()
 
 for i in range(1):
     if lastsym == '**':
-            if symbols[-1] == "/":
-                equation = equation[:-1]
-                equation = equation[:-1]
-                symbols.pop()
-                checker(False, 1)
-            else:
-                i = checker(power(), i)
+        if symbols[-1] == "/":
+            equation = equation[:-1]
+            equation = equation[:-1]
+            symbols.pop()
+            checker(False, 1)
+        else:
+            i = checker(power(), i)
     elif lastsym == "/":
         i = checker(divide(), i)
     else:
