@@ -33,20 +33,25 @@ length = input("How long do you want the equation to be?")
 
 def power():
     """Function to power a number"""
+
     global equation, loop, numbers
 
+    # Debug Logs
     if loop != 0:
         print("Power Repeat")
     else:
         print("Power Start")
 
+    # Removes te power as powering the number makes it too large
     if loop == 5:
         equation = equation[:-1]
         equation = equation[:-1]
         symbols.pop()
 
         return False
-    
+
+    # Checks if number is too large and 
+    # stops powering the number if its too large
     if eval(equation[:-2]) > 1000000:
         equation = equation[:-1]
         equation = equation[:-1]
@@ -54,22 +59,30 @@ def power():
 
         return False
 
+    # Creates the number to use to raise the power
     new_number = random.randint(1,9)
     equation += str(new_number)
 
+    # tries to power the equation
     try:
         eval(equation)
 
+    # Number too large
     except OverflowError:
+
+        # Breaks from the equation
         equation = equation[:-1]
         loop += 1
         power()
 
+    # Number too large after powering
+    # Causes weird problems in code if number is too large
     if eval(equation) > 1000000:
         equation = equation[:-1]
         loop +=1
         power()
 
+    # Found a suitable number to use as the power
     loop = 0
     numbers.append(new_number)
     print(f"Added: {new_number}")
@@ -79,6 +92,8 @@ def power():
     return True
 
 def divide():
+    """Function to divide a number"""
+
     global equation, numbers
 
     print("Divide Start")
@@ -181,17 +196,57 @@ def pemdas_check():
     return numbers[-1]
 
 def get_equation():
+    """Functions that generates the equation"""
+
     global equation, lastsym, length, symbols, numbers
 
-    for i in range(int(length)):
+    for i in range(int(length)+1):
         if lastsym == '**':
-            i = checker(power(), i)
+            if symbols[-1] == "/":
+                equation = equation[:-1]
+                equation = equation[:-1]
+                symbols.pop()
+                checker(False, 1)
+            else:
+                i = checker(power(), i)
         elif lastsym == "/":
             i = checker(divide(), i)
         else:
-            new_number = random.randint(1,999)
-            equation += str(new_number)
-            numbers.append(new_number)
+            try:
+                eval(equation[:-len(lastsym[-1])])
+            except SyntaxError:
+                new_number = random.randint(1,999)
+                equation += str(new_number)
+                numbers.append(new_number)
+            except IndexError:
+                new_number = random.randint(1,999)
+                equation += str(new_number)
+                numbers.append(new_number)
+            else:
+                if eval(equation[:-len(lastsym[-1])]) > 1000000 or \
+                   eval(equation[:-len(lastsym[-1])]) < -1000000:
+                    if lastsym == "**":
+                        equation = equation[:-2]
+                    else:
+                        equation = equation[:-1]
+                    symbols.pop()
+
+                    choice = random.randint(1,2)
+
+                    if choice == 1:
+                        symbols.append('/')
+                        equation += '/'
+                        i = checker(divide(), i)
+                    elif choice == 2:
+                        symbols.append('-')
+                        equation += "-"
+                        new_number = random.randint(1,999)
+                        equation += str(new_number)
+                        numbers.append(new_number)
+                else:
+                    new_number = random.randint(1,999)
+                    equation += str(new_number)
+                    numbers.append(new_number)
 
             print(f"Added {new_number}")
 
@@ -205,20 +260,58 @@ def get_equation():
         symbols.append(lastsym)
 
         print(f"Added {lastsym}")
- 
+
 
 # Gets equation
 get_equation()
 
 for i in range(1):
     if lastsym == '**':
-        i = checker(power(), i)
+            if symbols[-1] == "/":
+                equation = equation[:-1]
+                equation = equation[:-1]
+                symbols.pop()
+                checker(False, 1)
+            else:
+                i = checker(power(), i)
     elif lastsym == "/":
         i = checker(divide(), i)
     else:
-        new_number = random.randint(1,999)
-        equation += str(new_number)
-        numbers.append(new_number)
+        try:
+            eval(equation[:-len(lastsym[-1])])
+        except SyntaxError:
+            new_number = random.randint(1,999)
+            equation += str(new_number)
+            numbers.append(new_number)
+        except IndexError:
+            new_number = random.randint(1,999)
+            equation += str(new_number)
+            numbers.append(new_number)
+        else:
+            if eval(equation[:-len(lastsym[-1])]) > 1000000 or \
+               eval(equation[:-len(lastsym[-1])]) < -1000000:
+                if lastsym == "**":
+                    equation = equation[:-2]
+                else:
+                    equation = equation[:-1]
+                symbols.pop()
+
+                choice = random.randint(1,2)
+
+                if choice == 1:
+                    symbols.append('/')
+                    equation += '/'
+                    i = checker(divide(), i)
+                elif choice == 2:
+                    symbols.append('-')
+                    equation += "-"
+                    new_number = random.randint(1,999)
+                    equation += str(new_number)
+                    numbers.append(new_number)
+            else:
+                new_number = random.randint(1,999)
+                equation += str(new_number)
+                numbers.append(new_number)
 
 extra = (int(result)) - eval(equation)
 
